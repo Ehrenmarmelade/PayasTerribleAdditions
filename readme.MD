@@ -1,3 +1,7 @@
+> [!IMPORTANT]
+> This is an unofficial, modified copy of the archived [original mod](https://github.com/hayaunderscore/PayasTerribleAdditions) by haya3218 and ariyi.
+> Changed on 2026-11-25: compatibility fixes for Steamodded 26.x (see the commit history). No new content.
+
 > [!NOTE]
 > This mod is currently a work in progress!<br>
 > Also this mod has various references to Blue Archive, Monopoly, DOS, and other bullshit I like.
