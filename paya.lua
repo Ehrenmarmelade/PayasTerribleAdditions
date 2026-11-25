@@ -256,9 +256,10 @@ assert(SMODS.load_file("lib/ui.lua"))()
 assert(SMODS.load_file("lib/scale.lua"))()
 
 for _, mod in pairs(SMODS.Mods) do
-	if mod.can_load and mod.path and not mod.meta_mod and mod.payasaka_crossmod_file and NFS.getInfo(mod.path..mod.payasaka_crossmod_file) and mod ~= PTASaka.Mod then
+	local crossmod_file = mod.payasaka_crossmod_file or "pta.lua"
+	if mod.can_load and mod.path and not mod.meta_mod and NFS.getInfo(mod.path..crossmod_file) and mod ~= PTASaka.Mod then
 		pcall(function()
-			local p = SMODS.load_file(mod.payasaka_crossmod_file, mod.id)
+			local p = SMODS.load_file(crossmod_file, mod.id)
 			if p then p() end
 		end)
 	end

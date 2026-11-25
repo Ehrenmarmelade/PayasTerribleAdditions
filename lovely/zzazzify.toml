@@ -5,8 +5,8 @@ priority = 0
 
 [[patches]]
 [patches.pattern]
-target = 'functions/misc_functions.lua'
-pattern = 'local desc_scale = G.LANG.font.DESCSCALE'
+target = '''=[SMODS _ "src/utils.lua"]'''
+pattern = 'local desc_scale = (thunk.font or G.LANG.font).DESCSCALE'
 position = 'before'
 payload = '''
 if G and G.GAME and G.GAME.payasaka_tmtrainer_effects then
@@ -19,7 +19,7 @@ times = 1
 [[patches]]
 [patches.pattern]
 target = 'functions/misc_functions.lua'
-pattern = '''local final_line = {}'''
+pattern = '''local final_line = SMODS.localize_box(lines, args)'''
 position = 'before'
 payload = '''
 if _ > 1 and (G and G.GAME and G.GAME.payasaka_documentation_effects) then goto cont end

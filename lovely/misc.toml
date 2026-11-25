@@ -94,16 +94,6 @@ match_indent = true
 
 [[patches]]
 [patches.pattern]
-target = '''=[SMODS _ "src/loader.lua"]'''
-pattern = '''if not chunk then return nil, "Error processing file '" .. path .. "' for mod with ID '" .. mod.id .. "': " .. err end'''
-position = 'after'
-payload = '''
-pta_amount_of_lua_files_loaded_please_dont_override = pta_amount_of_lua_files_loaded_please_dont_override + 1
-'''
-match_indent = true
-
-[[patches]]
-[patches.pattern]
 target = 'functions/UI_definitions.lua'
 pattern = '''local sell = nil'''
 position = 'before'
@@ -217,13 +207,13 @@ match_indent = true
 [[patches]]
 [patches.pattern]
 target = 'functions/state_events.lua'
-pattern = '''draw_card(G.deck,G.hand, i*100/hand_space,'up', true)'''
+pattern = '''draw_card(G.deck,G.hand, i*100/hand_space,'up', true, cards_to_draw[i])'''
 position = 'after'
 payload = '''
 if G.GAME.payasaka_erratic_ultra then
 	local suit = pseudorandom_element(G.GAME.payasaka_erratic_saved_suits, pseudoseed('erratic2')).key
 	local rank = pseudorandom_element(G.GAME.payasaka_erratic_saved_ranks, pseudoseed('erratic2')).key
-	local _ = SMODS.change_base(G.deck.cards[#G.deck.cards], suit, rank)
+	local _ = SMODS.change_base(cards_to_draw[i] or G.deck.cards[#G.deck.cards], suit, rank)
 end
 '''
 match_indent = true
@@ -322,7 +312,7 @@ match_indent = true
 [[patches]]
 [patches.pattern]
 target = 'functions/UI_definitions.lua'
-pattern = "for _, v in ipairs(SMODS.ConsumableType.ctype_buffer) do"
+pattern = "for _, v in ipairs(SMODS.ConsumableType.obj_buffer) do"
 position = 'before'
 payload = '''
 if G.GAME.payasaka_deck_rate then
@@ -508,7 +498,7 @@ match_indent = true
 [[patches]]
 [patches.pattern]
 target = '''functions/UI_definitions.lua'''
-pattern = '''blind_choice.animation = AnimatedSprite(0,0, 1.4, 1.4, G.ANIMATION_ATLAS[blind_choice.config.atlas] or G.ANIMATION_ATLAS['blind_chips'],  blind_choice.config.pos)'''
+pattern = '''blind_choice.animation =  SMODS.create_sprite(0,0, 1.4, 1.4, SMODS.get_atlas(blind_choice.config.atlas) or  'blind_chips',   blind_choice.config.pos)'''
 position = 'after'
 payload = '''
 if blind_choice.config.key == "bl_payasaka_question" and G.GAME and G.GAME.round_resets and G.GAME.round_resets.last_cast_boss then
@@ -587,67 +577,6 @@ payload = '''
 (self.ability.set == 'Risk' and {G.C.SECONDARY_SET.Risk, G.C.SET.Risk}) or 
 (self.ability.set == 'Reward' and {G.C.SECONDARY_SET.Reward, G.C.SET.Reward}) or 
 (SMODS.ConsumableTypes[self.ability.set] and {SMODS.ConsumableTypes[self.ability.set].secondary_colour or G.C.GREEN}) or 
-'''
-match_indent = true
-
-[[patches]]
-[patches.pattern]
-target = 'game.lua'
-pattern = '''if v.set == 'Joker' then table.insert(self.P_CENTER_POOLS['Joker'], v) end'''
-position = 'after'
-payload = '''
-if v.set == 'Joker' then
-	local _, desc = pcall(function() return localize { type = 'raw_descriptions', key = v.key, set = v.set, vars = {} } end)
-	if desc and type(desc) == 'table' then
-		for _, line in ipairs(desc) do
-			if line:find("nil in nil") or line:find("chance") then
-				--print("Probability joker! "..v.key)
-				self.PAYASAKA_PROBABILITY_JOKERS = self.PAYASAKA_PROBABILITY_JOKERS or {}
-				self.PAYASAKA_PROBABILITY_JOKERS[v.key] = true
-				break
-			end
-		end
-	end
-end
-'''
-match_indent = true
-
-[[patches]]
-[patches.pattern]
-target = '''=[SMODS _ "src/loader.lua"]'''
-pattern = '''assert(v._discovered_unlocked_overwritten, ("Internal: discovery/unlocked of object \"%s\" failed to override."):format(v and v.key or "UNKNOWN"))'''
-position = 'before'
-payload = '''
--- Check for probabilities
-if v.set and v.set == 'Joker' then
-	local _, desc = pcall(function() return localize { type = 'raw_descriptions', key = v.key, set = v.set, vars = {} } end)
-	if desc and type(desc) == 'table' then
-		for _, line in ipairs(desc) do
-			if line:find("nil in nil") or line:find("chance") then
-				--print("Probability joker! "..v.key)
-				G.PAYASAKA_PROBABILITY_JOKERS = G.PAYASAKA_PROBABILITY_JOKERS or {}
-				G.PAYASAKA_PROBABILITY_JOKERS[v.key] = true
-				break
-			end
-		end
-	end
-end
-'''
-match_indent = true
-
-[[patches]]
-[patches.pattern]
-target = '''functions/state_events.lua'''
-pattern = '''if G.GAME.round_resets.blind == G.P_BLINDS.bl_small then'''
-position = 'at'
-payload = '''
-if next(SMODS.find_card("j_payasaka_almondeye")) and G.GAME.blind_on_deck ~= 'Boss' then
-	if G.GAME.blind_on_deck == 'Small' then
-		G.GAME.round_resets.blind_states.Small = 'Defeated'
-	elseif G.GAME.blind_on_deck == 'Big' then
-		G.GAME.round_resets.blind_states.Big = 'Defeated'
-	end
-elseif G.GAME.round_resets.blind == G.P_BLINDS.bl_small then
 '''
 match_indent = true
 
@@ -908,17 +837,6 @@ end
 match_indent = true
 
 # Allow stencil on the canvas
-[[patches]]
-[patches.pattern]
-target = "game.lua"
-pattern = '''love.graphics.setCanvas{self.CANVAS}'''
-position = "at"
-payload = '''
-love.graphics.setCanvas({self.CANVAS, stencil = true})
-'''
-match_indent = true
-overwrite = false
-
 # Kitasan Black's soul graphic is clipped to the main card
 [[patches]]
 [patches.pattern]

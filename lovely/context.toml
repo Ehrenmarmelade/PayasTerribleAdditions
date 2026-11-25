@@ -380,7 +380,7 @@ match_indent = true
 
 [[patches]]
 [patches.pattern]
-target = 'functions/common_events.lua'
+target = '''=[SMODS _ "src/utils.lua"]'''
 pattern = '''if specific_vars and specific_vars.bonus_p_dollars then'''
 position = 'before'
 payload = '''
@@ -495,7 +495,7 @@ times = 1
 [[patches]]
 [patches.pattern]
 target = 'functions/common_events.lua'
-pattern = '''if not card:can_calculate(context.ignore_debuff, context.remove_playing_cards) then
+pattern = '''if not card:can_calculate(context.ignore_debuff, context.remove_playing_cards or context.joker_type_destroyed) then
         if card.ability.rental then
             local ret = {}
             ret[SMODS.Stickers.rental] = card:calculate_sticker(context, 'rental')
@@ -505,7 +505,7 @@ pattern = '''if not card:can_calculate(context.ignore_debuff, context.remove_pla
     end'''
 position = 'at'
 payload = '''
-if not card:can_calculate(context.ignore_debuff, context.remove_playing_cards) then
+if not card:can_calculate(context.ignore_debuff, context.remove_playing_cards or context.joker_type_destroyed) then
 	local ret = {}
 	for _,k in ipairs(PTASaka.Status.obj_buffer) do
         local v = PTASaka.Statuses[k]

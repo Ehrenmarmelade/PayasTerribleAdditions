@@ -259,6 +259,26 @@ SMODS.Sticker {
 	end
 }
 
+-- Jokers whose description mentions a chance. Looked up on demand, once the
+-- localization is loaded, instead of through load-time patches.
+G.PAYASAKA_PROBABILITY_JOKERS = G.PAYASAKA_PROBABILITY_JOKERS or {}
+local function is_probability_joker(center)
+	if not center or center.set ~= 'Joker' or not center.key then return false end
+	local known = G.PAYASAKA_PROBABILITY_JOKERS[center.key]
+	if known ~= nil then return known end
+	local found = false
+	local ok, desc = pcall(function() return localize { type = 'raw_descriptions', key = center.key, set = center.set, vars = {} } end)
+	if not ok or type(desc) ~= 'table' then return false end
+	for _, line in ipairs(desc) do
+		if type(line) == 'string' and (line:find("nil in nil") or line:find("chance")) then
+			found = true
+			break
+		end
+	end
+	G.PAYASAKA_PROBABILITY_JOKERS[center.key] = found
+	return found
+end
+
 SMODS.Sticker {
 	key = 'unlucky',
 	atlas = "JOE_Enhancements",
@@ -283,7 +303,7 @@ SMODS.Sticker {
 		end
 	end,
 	should_apply = function(self, card, center, area, bypass_reroll)
-		if card and G.PAYASAKA_PROBABILITY_JOKERS[center.key] then
+		if card and is_probability_joker(center) then
 			return deck_sleeve_combo_apply(self, card, center, area, bypass_reroll)
 		end
 		return false

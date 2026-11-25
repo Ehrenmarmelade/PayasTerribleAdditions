@@ -69,26 +69,16 @@ match_indent = true
 [[patches]]
 [patches.pattern]
 target = 'functions/state_events.lua'
-pattern = '''draw_card(G.deck,G.hand, i*100/hand_space,'up', true)'''
+pattern = '''draw_card(G.deck,G.hand, i*100/hand_space,'up', true, cards_to_draw[i])'''
 position = 'at'
 payload = '''
-draw_card(G.deck,G.hand, i*100/hand_space,'up', true, nil, nil, nil, i <= (G.GAME.payasaka_elusive_cards or 0))
+draw_card(G.deck,G.hand, i*100/hand_space,'up', true, cards_to_draw[i], nil, nil, i <= (G.GAME.payasaka_elusive_cards or 0))
 '''
 match_indent = true
 
 # This is a very stupid patch.
 # I shouldn't need to do this but doing this some other way requires me to tinker more and ionlikedat
 # Thunk pls fix
-[[patches]]
-[patches.pattern]
-target = 'cardarea.lua'
-pattern = '''local stay_flipped = G.GAME and G.GAME.blind and G.GAME.blind:stay_flipped(self, card, area)'''
-position = 'at'
-payload = '''
-stay_flipped = stay_flipped or (G.GAME and G.GAME.blind and G.GAME.blind:stay_flipped(self, card, area))
-'''
-match_indent = true
-
 [[patches]]
 [patches.pattern]
 target = "functions/UI_definitions.lua"
@@ -121,7 +111,7 @@ match_indent = true
 [patches.pattern]
 target = "functions/button_callbacks.lua"
 pattern = '''
-local select_to = card.area == G.pack_cards and booster_obj and booster_obj.select_card and card:selectable_from_pack(booster_obj)
+local select_to = not e.config.SMODS_use_card and card.area == G.pack_cards and G.pack_cards and booster_obj and card:selectable_from_pack(booster_obj)
 '''
 position = "after"
 payload = '''
